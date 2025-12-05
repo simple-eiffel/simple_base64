@@ -103,6 +103,8 @@ feature -- Encoding
 				end
 
 				i := i + 3
+			variant
+				n - i + a_bytes.lower + 2
 			end
 		ensure
 			result_not_void: Result /= Void
@@ -158,6 +160,7 @@ feature -- Decoding
 			-- Decode Base64 `a_input' to bytes.
 		require
 			input_not_void: a_input /= Void
+			valid_or_normalizable: is_valid_base64 (a_input) or is_valid_base64_url (a_input) or a_input.is_empty
 		local
 			l_input: STRING
 			i, n: INTEGER
@@ -213,6 +216,8 @@ feature -- Decoding
 				end
 
 				i := i + 4
+			variant
+				n - i + 4
 			end
 
 			create Result.make_from_array (l_bytes.to_array)
@@ -370,6 +375,8 @@ feature {NONE} -- Implementation
 
 	char_to_value (a_char: CHARACTER): INTEGER
 			-- Convert Base64 character to 6-bit value.
+		require
+			valid_base64_char: Standard_alphabet.has (a_char) or Url_safe_alphabet.has (a_char) or a_char = '='
 		local
 			l_pos: INTEGER
 		do
