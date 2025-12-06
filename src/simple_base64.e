@@ -49,7 +49,6 @@ feature -- Encoding
 		do
 			Result := encode_bytes (string_to_bytes (a_input))
 		ensure
-			result_not_void: Result /= Void
 			valid_base64: is_valid_base64 (Result)
 		end
 
@@ -110,7 +109,6 @@ feature -- Encoding
 				n - i + a_bytes.lower + 2
 			end
 		ensure
-			result_not_void: Result /= Void
 			correct_length: Result.count = ((a_bytes.count + 2) // 3 * 4)
 		end
 
@@ -131,7 +129,6 @@ feature -- Encoding
 				Result.count
 			end
 		ensure
-			result_not_void: Result /= Void
 			no_padding: not Result.has ('=')
 			url_safe: not Result.has ('+') and not Result.has ('/')
 		end
@@ -144,7 +141,6 @@ feature -- Encoding
 			Result := encode (a_input)
 			Result := to_url_safe (Result)
 		ensure
-			result_not_void: Result /= Void
 			url_safe: not Result.has ('+') and not Result.has ('/')
 		end
 
@@ -155,8 +151,6 @@ feature -- Encoding
 			input_not_void: a_input /= Void
 		do
 			Result := encode_bytes_mime (string_to_bytes (a_input))
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	encode_bytes_mime (a_bytes: ARRAY [NATURAL_8]): STRING
@@ -184,8 +178,6 @@ feature -- Encoding
 			variant
 				l_raw.count - i + 1
 			end
-		ensure
-			result_not_void: Result /= Void
 		end
 
 feature -- Decoding
@@ -197,8 +189,6 @@ feature -- Decoding
 			valid_input: is_valid_base64 (a_input) or is_valid_base64_url (a_input)
 		do
 			Result := bytes_to_string (decode_bytes (a_input))
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	decode_bytes (a_input: STRING): ARRAY [NATURAL_8]
@@ -266,8 +256,6 @@ feature -- Decoding
 			end
 
 			create Result.make_from_array (l_bytes.to_array)
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	decode_url (a_input: STRING): STRING
@@ -276,8 +264,6 @@ feature -- Decoding
 			input_not_void: a_input /= Void
 		do
 			Result := decode (a_input)
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	decode_lenient (a_input: STRING): STRING
@@ -287,8 +273,6 @@ feature -- Decoding
 			input_not_void: a_input /= Void
 		do
 			Result := bytes_to_string (decode_bytes_lenient (a_input))
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	decode_bytes_lenient (a_input: STRING): ARRAY [NATURAL_8]
@@ -318,8 +302,6 @@ feature -- Decoding
 			end
 
 			Result := decode_bytes (l_cleaned)
-		ensure
-			result_not_void: Result /= Void
 		end
 
 feature -- Validation
@@ -399,7 +381,6 @@ feature -- Conversion
 			Result.replace_substring_all ("+", "-")
 			Result.replace_substring_all ("/", "_")
 		ensure
-			result_not_void: Result /= Void
 			no_plus: not Result.has ('+')
 			no_slash: not Result.has ('/')
 		end
@@ -413,7 +394,6 @@ feature -- Conversion
 			Result.replace_substring_all ("-", "+")
 			Result.replace_substring_all ("_", "/")
 		ensure
-			result_not_void: Result /= Void
 			no_dash: not Result.has ('-')
 			no_underscore: not Result.has ('_')
 		end
@@ -435,7 +415,6 @@ feature -- Data URI Support
 			Result.append (";base64,")
 			Result.append (encode (a_data))
 		ensure
-			result_not_void: Result /= Void
 			is_data_uri: is_data_uri (Result)
 		end
 
@@ -452,7 +431,6 @@ feature -- Data URI Support
 			Result.append (";base64,")
 			Result.append (encode_bytes (a_bytes))
 		ensure
-			result_not_void: Result /= Void
 			is_data_uri: is_data_uri (Result)
 		end
 
@@ -476,8 +454,6 @@ feature -- Data URI Support
 			else
 				create Result.make_empty
 			end
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	from_data_uri_bytes (a_uri: STRING): ARRAY [NATURAL_8]
@@ -500,8 +476,6 @@ feature -- Data URI Support
 			else
 				create Result.make_empty
 			end
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	data_uri_mediatype (a_uri: STRING): STRING
@@ -527,8 +501,6 @@ feature -- Data URI Support
 			else
 				create Result.make_empty
 			end
-		ensure
-			result_not_void: Result /= Void
 		end
 
 	is_data_uri (a_input: STRING): BOOLEAN
@@ -570,7 +542,6 @@ feature {NONE} -- Implementation
 			end
 			create Result.make_from_array (l_bytes.to_array)
 		ensure
-			result_not_void: Result /= Void
 			same_count: Result.count = a_string.count
 		end
 
@@ -593,7 +564,6 @@ feature {NONE} -- Implementation
 				a_bytes.upper - i + 1
 			end
 		ensure
-			result_not_void: Result /= Void
 			same_count: Result.count = a_bytes.count
 		end
 
@@ -644,7 +614,6 @@ feature {NONE} -- Implementation
 				end
 			end
 		ensure
-			result_not_void: Result /= Void
 			padded: Result.count \\ 4 = 0
 		end
 
