@@ -42,7 +42,10 @@ feature {NONE} -- Initialization
 
 feature -- Encoding
 
-	encode (a_input: STRING): STRING
+	encode,
+	to_base64,
+	encode_string,
+	base64_encode (a_input: STRING): STRING
 			-- Encode `a_input' to standard Base64.
 		require
 			input_not_void: a_input /= Void
@@ -112,7 +115,10 @@ feature -- Encoding
 			correct_length: Result.count = ((a_bytes.count + 2) // 3 * 4)
 		end
 
-	encode_url (a_input: STRING): STRING
+	encode_url,
+	to_base64url,
+	encode_jwt,
+	encode_token (a_input: STRING): STRING
 			-- Encode `a_input' to URL-safe Base64URL (no padding).
 		require
 			input_not_void: a_input /= Void
@@ -182,7 +188,10 @@ feature -- Encoding
 
 feature -- Decoding
 
-	decode (a_input: STRING): STRING
+	decode,
+	from_base64,
+	decode_string,
+	base64_decode (a_input: STRING): STRING
 			-- Decode standard Base64 `a_input' to string.
 		require
 			input_not_void: a_input /= Void
@@ -258,7 +267,10 @@ feature -- Decoding
 			create Result.make_from_array (l_bytes.to_array)
 		end
 
-	decode_url (a_input: STRING): STRING
+	decode_url,
+	from_base64url,
+	decode_jwt,
+	decode_token (a_input: STRING): STRING
 			-- Decode URL-safe Base64URL `a_input' to string.
 		require
 			input_not_void: a_input /= Void
@@ -306,7 +318,9 @@ feature -- Decoding
 
 feature -- Validation
 
-	is_valid_base64 (a_input: STRING): BOOLEAN
+	is_valid_base64,
+	is_base64,
+	valid_base64 (a_input: STRING): BOOLEAN
 			-- Is `a_input' valid standard Base64?
 		require
 			input_not_void: a_input /= Void
@@ -342,7 +356,9 @@ feature -- Validation
 			end
 		end
 
-	is_valid_base64_url (a_input: STRING): BOOLEAN
+	is_valid_base64_url,
+	is_base64url,
+	valid_base64url (a_input: STRING): BOOLEAN
 			-- Is `a_input' valid URL-safe Base64URL?
 		require
 			input_not_void: a_input /= Void
@@ -400,7 +416,10 @@ feature -- Conversion
 
 feature -- Data URI Support
 
-	to_data_uri (a_data, a_mediatype: STRING): STRING
+	to_data_uri,
+	embed,
+	embed_data,
+	as_data_uri (a_data, a_mediatype: STRING): STRING
 			-- Create a data URI from `a_data' with `a_mediatype'.
 			-- Format: data:<mediatype>;base64,<encoded_data>
 			-- Example: data:text/plain;base64,SGVsbG8h
@@ -434,7 +453,10 @@ feature -- Data URI Support
 			is_data_uri: is_data_uri (Result)
 		end
 
-	from_data_uri (a_uri: STRING): STRING
+	from_data_uri,
+	extract,
+	extract_data,
+	data_uri_content (a_uri: STRING): STRING
 			-- Extract and decode data from `a_uri'.
 			-- Returns the decoded data or empty string if invalid.
 		require
