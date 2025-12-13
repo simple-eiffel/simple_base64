@@ -3,7 +3,7 @@ note
 	author: "Larry Rix"
 
 class
-	BASE64_TEST_APP
+	TEST_APP
 
 create
 	make
@@ -12,8 +12,6 @@ feature {NONE} -- Initialization
 
 	make
 			-- Run tests.
-		local
-			tests: SIMPLE_BASE64_TEST_SET
 		do
 			create tests
 			print ("simple_base64 test runner%N")
@@ -95,6 +93,8 @@ feature {NONE} -- Initialization
 		end
 
 feature {NONE} -- Implementation
+
+	tests: LIB_TESTS
 
 	passed: INTEGER
 	failed: INTEGER
