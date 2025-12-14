@@ -1,0 +1,9 @@
+{
+  "name": "simple_base64",
+  "version": "0.1.0",
+  "description": "Simple Base64 Library - Encoding and decoding for Base64 and Base64URL",
+  "author": "Larry Rix",
+  "license": "MIT",
+  "category": "data-formats",
+  "keywords": ["base64", "encoding", "decoding", "binary"]
+}
