@@ -21,12 +21,12 @@ Lightweight Base64 encoding and decoding library for Eiffel.
 Add to your ECF:
 
 ```xml
-<library name="simple_base64" location="$SIMPLE_BASE64\simple_base64.ecf"/>
+<library name="simple_base64" location="$SIMPLE_EIFFEL/simple_base64/simple_base64.ecf"/>
 ```
 
-Set environment variable:
+Set environment variable (one-time setup for all simple_* libraries):
 ```
-SIMPLE_BASE64=D:\prod\simple_base64
+SIMPLE_EIFFEL=D:\prod
 ```
 
 ## Usage
