@@ -1,12 +1,28 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/simple-eiffel/.github/main/profile/assets/logo.png" alt="simple_ library logo" width="400">
+  <img src="docs/images/logo.png" alt="simple_base64 logo" width="200">
 </p>
 
-# simple_base64
+<h1 align="center">simple_base64</h1>
 
-**[Documentation](https://simple-eiffel.github.io/simple_base64/)** | **[Watch the Build Video](https://youtu.be/zZmpyOlztK8)**
+<p align="center">
+  <a href="https://simple-eiffel.github.io/simple_base64/">Documentation</a> •
+  <a href="https://github.com/simple-eiffel/simple_base64">GitHub</a>
+</p>
 
-Lightweight Base64 encoding and decoding library for Eiffel.
+<p align="center">
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT">
+  <img src="https://img.shields.io/badge/Eiffel-25.02-purple.svg" alt="Eiffel 25.02">
+  <img src="https://img.shields.io/badge/DBC-Contracts-green.svg" alt="Design by Contract">
+</p>
+
+**Lightweight Base64 encoding and decoding** — RFC 4648 compliant with URL-safe variant. Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
+
+## Status
+
+✅ **Production Ready** — v1.0.0
+- RFC 4648 compliant encoding/decoding
+- URL-safe Base64URL variant
+- Full Design by Contract coverage
 
 ## Features
 
@@ -134,4 +150,8 @@ standard := encoder.to_standard ("abc-_def==")
 
 ## License
 
-MIT License - Copyright (c) 2024-2025, Larry Rix
+MIT License - see [LICENSE](LICENSE) file.
+
+---
+
+Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
