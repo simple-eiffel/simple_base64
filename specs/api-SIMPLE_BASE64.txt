@@ -1,0 +1,611 @@
+note
+	description: "[
+				Simple Base64 - Encoding and decoding for Base64 and Base64URL.
+		
+				Provides RFC 4648 compliant Base64 encoding and decoding with support for
+				both standard Base64 and URL-safe Base64URL variants.
+		
+				Features:
+				- Encode strings to Base64
+				- Decode Base64 to strings
+				- URL-safe Base64URL encoding (for JWT, URLs, filenames)
+				- Optional padding control
+		
+				Usage:
+					create encoder.make
+					encoded := encoder.encode ("Hello, World!")
+					decoded := encoder.decode (encoded)
+		
+					-- URL-safe variant
+					url_safe := encoder.encode_url ("data+with/special=chars")
+	]"
+	author: "Larry Rix"
+	date: "$Date$"
+	revision: "$Revision$"
+	eis: "name=Documentation", "src=../docs/index.html", "protocol=URI", "tag=documentation"
+	eis: "name=API Reference", "src=../docs/api/simple_base64.html", "protocol=URI", "tag=api"
+	eis: "name=RFC 4648", "src=https://datatracker.ietf.org/doc/html/rfc4648", "protocol=URI", "tag=specification"
+
+class interface
+	SIMPLE_BASE64
+
+create 
+	make
+			-- Initialize the encoder.
+
+feature -- Access
+
+	generating_type: TYPE [detachable SIMPLE_BASE64]
+			-- Type of current object
+			-- (type of which it is a direct instance)
+			-- (from ANY)
+		ensure -- from ANY
+			generating_type_not_void: Result /= Void
+
+	generator: STRING_8
+			-- Name of current object's generating class
+			-- (base class of the type of which it is a direct instance)
+			-- (from ANY)
+		ensure -- from ANY
+			generator_not_void: Result /= Void
+			generator_not_empty: not Result.is_empty
+	
+feature -- Comparison
+
+	frozen deep_equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void
+			-- or attached to isomorphic object structures?
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			shallow_implies_deep: standard_equal (a, b) implies Result
+			both_or_none_void: (a = Void) implies (Result = (b = Void))
+			same_type: (Result and (a /= Void)) implies (b /= Void and then a.same_type (b))
+			symmetric: Result implies deep_equal (b, a)
+
+	frozen equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void or attached
+			-- to objects considered equal?
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			definition: Result = (a = Void and b = Void) or else ((a /= Void and b /= Void) and then a.is_equal (b))
+
+	frozen is_deep_equal alias "≡≡≡" (other: SIMPLE_BASE64): BOOLEAN
+			-- Are `Current` and `other` attached to isomorphic object structures?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			shallow_implies_deep: standard_is_equal (other) implies Result
+			same_type: Result implies same_type (other)
+			symmetric: Result implies other.is_deep_equal (Current)
+
+	is_equal (other: SIMPLE_BASE64): BOOLEAN
+			-- Is `other` attached to an object considered
+			-- equal to current object?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			symmetric: Result implies other ~ Current
+			consistent: standard_is_equal (other) implies Result
+
+	frozen standard_equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void or attached to
+			-- field-by-field identical objects of the same type?
+			-- Always uses default object comparison criterion.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			definition: Result = (a = Void and b = Void) or else ((a /= Void and b /= Void) and then a.standard_is_equal (b))
+
+	frozen standard_is_equal alias "≜" (other: SIMPLE_BASE64): BOOLEAN
+			-- Is `other` attached to an object of the same type
+			-- as current object, and field-by-field identical to it?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			same_type: Result implies same_type (other)
+			symmetric: Result implies other.standard_is_equal (Current)
+	
+feature -- Status report
+
+	conforms_to (other: ANY): BOOLEAN
+			-- Does type of current object conform to type
+			-- of `other` (as per Eiffel: The Language, chapter 13)?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+
+	same_type (other: ANY): BOOLEAN
+			-- Is type of current object identical to type of `other`?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			definition: Result = (conforms_to (other) and other.conforms_to (Current))
+	
+feature -- Conversion
+
+	to_standard (a_base64url: STRING_8): STRING_8
+			-- Convert URL-safe Base64URL to standard Base64.
+		require
+			input_not_void: a_base64url /= Void
+		ensure
+			no_dash: not Result.has ('-')
+			no_underscore: not Result.has ('_')
+
+	to_url_safe (a_base64: STRING_8): STRING_8
+			-- Convert standard Base64 to URL-safe Base64URL.
+		require
+			input_not_void: a_base64 /= Void
+		ensure
+			no_plus: not Result.has ('+')
+			no_slash: not Result.has ('/')
+	
+feature -- Duplication
+
+	copy (other: SIMPLE_BASE64)
+			-- Update current object using fields of object attached
+			-- to `other`, so as to yield equal objects.
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+			type_identity: same_type (other)
+		ensure -- from ANY
+			is_equal: Current ~ other
+
+	frozen deep_copy (other: SIMPLE_BASE64)
+			-- Effect equivalent to that of:
+			--		`copy` (`other` . `deep_twin`)
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			deep_equal: deep_equal (Current, other)
+
+	frozen deep_twin: SIMPLE_BASE64
+			-- New object structure recursively duplicated from Current.
+			-- (from ANY)
+		ensure -- from ANY
+			deep_twin_not_void: Result /= Void
+			deep_equal: deep_equal (Current, Result)
+
+	frozen standard_copy (other: SIMPLE_BASE64)
+			-- Copy every field of `other` onto corresponding field
+			-- of current object.
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+			type_identity: same_type (other)
+		ensure -- from ANY
+			is_standard_equal: standard_is_equal (other)
+
+	frozen standard_twin: SIMPLE_BASE64
+			-- New object field-by-field identical to `other`.
+			-- Always uses default copying semantics.
+			-- (from ANY)
+		ensure -- from ANY
+			standard_twin_not_void: Result /= Void
+			equal: standard_equal (Result, Current)
+
+	frozen twin: SIMPLE_BASE64
+			-- New object equal to `Current`
+			-- `twin` calls `copy`; to change copying/twinning semantics, redefine `copy`.
+			-- (from ANY)
+		ensure -- from ANY
+			twin_not_void: Result /= Void
+			is_equal: Result ~ Current
+	
+feature -- Basic operations
+
+	frozen default: detachable SIMPLE_BASE64
+			-- Default value of object's type
+			-- (from ANY)
+
+	frozen default_pointer: POINTER
+			-- Default value of type `POINTER`
+			-- (Avoid the need to write `p`.`default` for
+			-- some `p` of type `POINTER`.)
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+
+	default_rescue
+			-- Process exception for routines with no Rescue clause.
+			-- (Default: do nothing.)
+			-- (from ANY)
+
+	frozen do_nothing
+			-- Execute a null action.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+	
+feature -- Constants
+
+	Data_uri_prefix: STRING_8 = "data:"
+			-- Data URI scheme prefix (RFC 2397).
+
+	Mime_line_length: INTEGER_32 = 76
+			-- Maximum line length for MIME encoding (RFC 2045).
+
+	Padding_char: CHARACTER_8 = '='
+			-- Padding character.
+
+	Standard_alphabet: STRING_8 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+			-- Standard Base64 alphabet (RFC 4648).
+
+	Url_safe_alphabet: STRING_8 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+			-- URL-safe Base64URL alphabet (RFC 4648).
+	
+feature -- Data URI Support
+
+	as_data_uri (a_data, a_mediatype: STRING_8): STRING_8
+			-- Create a data URI from `a_data` with `a_mediatype`.
+			-- Format: data:<mediatype>;base64,<encoded_data>
+			-- Example: data:text/plain;base64,SGVsbG8h
+			-- Was declared in {SIMPLE_BASE64} as synonym of `to_data_uri`, `embed` and `embed_data`.
+		require
+			data_not_void: a_data /= Void
+			mediatype_not_void: a_mediatype /= Void
+			mediatype_not_empty: not a_mediatype.is_empty
+		ensure
+			is_data_uri: is_data_uri (Result)
+
+	data_uri_content (a_uri: STRING_8): STRING_8
+			-- Extract and decode data from `a_uri`.
+			-- Returns the decoded data or empty string if invalid.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `from_data_uri`, `extract` and `extract_data`.
+		require
+			uri_not_void: a_uri /= Void
+
+	data_uri_mediatype (a_uri: STRING_8): STRING_8
+			-- Extract the mediatype from `a_uri`.
+			-- Returns empty string if not a valid data URI.
+		require
+			uri_not_void: a_uri /= Void
+
+	embed (a_data, a_mediatype: STRING_8): STRING_8
+			-- Create a data URI from `a_data` with `a_mediatype`.
+			-- Format: data:<mediatype>;base64,<encoded_data>
+			-- Example: data:text/plain;base64,SGVsbG8h
+			-- Was declared in {SIMPLE_BASE64} as synonym of `to_data_uri`, `embed_data` and `as_data_uri`.
+		require
+			data_not_void: a_data /= Void
+			mediatype_not_void: a_mediatype /= Void
+			mediatype_not_empty: not a_mediatype.is_empty
+		ensure
+			is_data_uri: is_data_uri (Result)
+
+	embed_data (a_data, a_mediatype: STRING_8): STRING_8
+			-- Create a data URI from `a_data` with `a_mediatype`.
+			-- Format: data:<mediatype>;base64,<encoded_data>
+			-- Example: data:text/plain;base64,SGVsbG8h
+			-- Was declared in {SIMPLE_BASE64} as synonym of `to_data_uri`, `embed` and `as_data_uri`.
+		require
+			data_not_void: a_data /= Void
+			mediatype_not_void: a_mediatype /= Void
+			mediatype_not_empty: not a_mediatype.is_empty
+		ensure
+			is_data_uri: is_data_uri (Result)
+
+	extract (a_uri: STRING_8): STRING_8
+			-- Extract and decode data from `a_uri`.
+			-- Returns the decoded data or empty string if invalid.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `from_data_uri`, `extract_data` and `data_uri_content`.
+		require
+			uri_not_void: a_uri /= Void
+
+	extract_data (a_uri: STRING_8): STRING_8
+			-- Extract and decode data from `a_uri`.
+			-- Returns the decoded data or empty string if invalid.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `from_data_uri`, `extract` and `data_uri_content`.
+		require
+			uri_not_void: a_uri /= Void
+
+	from_data_uri (a_uri: STRING_8): STRING_8
+			-- Extract and decode data from `a_uri`.
+			-- Returns the decoded data or empty string if invalid.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `extract`, `extract_data` and `data_uri_content`.
+		require
+			uri_not_void: a_uri /= Void
+
+	from_data_uri_bytes (a_uri: STRING_8): ARRAY [NATURAL_8]
+			-- Extract and decode bytes from `a_uri`.
+			-- Returns the decoded bytes or empty array if invalid.
+		require
+			uri_not_void: a_uri /= Void
+
+	is_base64_data_uri (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` a Base64-encoded data URI?
+		require
+			input_not_void: a_input /= Void
+
+	is_data_uri (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` a valid data URI?
+		require
+			input_not_void: a_input /= Void
+
+	to_data_uri (a_data, a_mediatype: STRING_8): STRING_8
+			-- Create a data URI from `a_data` with `a_mediatype`.
+			-- Format: data:<mediatype>;base64,<encoded_data>
+			-- Example: data:text/plain;base64,SGVsbG8h
+			-- Was declared in {SIMPLE_BASE64} as synonym of `embed`, `embed_data` and `as_data_uri`.
+		require
+			data_not_void: a_data /= Void
+			mediatype_not_void: a_mediatype /= Void
+			mediatype_not_empty: not a_mediatype.is_empty
+		ensure
+			is_data_uri: is_data_uri (Result)
+
+	to_data_uri_bytes (a_bytes: ARRAY [NATURAL_8]; a_mediatype: STRING_8): STRING_8
+			-- Create a data URI from `a_bytes` with `a_mediatype`.
+		require
+			bytes_not_void: a_bytes /= Void
+			mediatype_not_void: a_mediatype /= Void
+			mediatype_not_empty: not a_mediatype.is_empty
+		ensure
+			is_data_uri: is_data_uri (Result)
+	
+feature -- Decoding
+
+	base64_decode (a_input: STRING_8): STRING_8
+			-- Decode standard Base64 `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `decode`, `from_base64` and `decode_string`.
+		require
+			input_not_void: a_input /= Void
+			valid_input: is_valid_base64 (a_input) or is_valid_base64_url (a_input)
+
+	decode (a_input: STRING_8): STRING_8
+			-- Decode standard Base64 `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `from_base64`, `decode_string` and `base64_decode`.
+		require
+			input_not_void: a_input /= Void
+			valid_input: is_valid_base64 (a_input) or is_valid_base64_url (a_input)
+
+	decode_bytes (a_input: STRING_8): ARRAY [NATURAL_8]
+			-- Decode Base64 `a_input` to bytes.
+		require
+			input_not_void: a_input /= Void
+			valid_or_normalizable: is_valid_base64 (a_input) or is_valid_base64_url (a_input) or a_input.is_empty
+
+	decode_bytes_lenient (a_input: STRING_8): ARRAY [NATURAL_8]
+			-- Decode Base64 `a_input` to bytes, ignoring whitespace.
+			-- Strips CR, LF, space, and tab before decoding.
+		require
+			input_not_void: a_input /= Void
+
+	decode_jwt (a_input: STRING_8): STRING_8
+			-- Decode URL-safe Base64URL `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `decode_url`, `from_base64url` and `decode_token`.
+		require
+			input_not_void: a_input /= Void
+
+	decode_lenient (a_input: STRING_8): STRING_8
+			-- Decode Base64 `a_input`, ignoring whitespace and line breaks.
+			-- More tolerant than `decode` - suitable for MIME-encoded content.
+		require
+			input_not_void: a_input /= Void
+
+	decode_string (a_input: STRING_8): STRING_8
+			-- Decode standard Base64 `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `decode`, `from_base64` and `base64_decode`.
+		require
+			input_not_void: a_input /= Void
+			valid_input: is_valid_base64 (a_input) or is_valid_base64_url (a_input)
+
+	decode_token (a_input: STRING_8): STRING_8
+			-- Decode URL-safe Base64URL `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `decode_url`, `from_base64url` and `decode_jwt`.
+		require
+			input_not_void: a_input /= Void
+
+	decode_url (a_input: STRING_8): STRING_8
+			-- Decode URL-safe Base64URL `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `from_base64url`, `decode_jwt` and `decode_token`.
+		require
+			input_not_void: a_input /= Void
+
+	from_base64 (a_input: STRING_8): STRING_8
+			-- Decode standard Base64 `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `decode`, `decode_string` and `base64_decode`.
+		require
+			input_not_void: a_input /= Void
+			valid_input: is_valid_base64 (a_input) or is_valid_base64_url (a_input)
+
+	from_base64url (a_input: STRING_8): STRING_8
+			-- Decode URL-safe Base64URL `a_input` to string.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `decode_url`, `decode_jwt` and `decode_token`.
+		require
+			input_not_void: a_input /= Void
+	
+feature -- Encoding
+
+	base64_encode (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to standard Base64.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `encode`, `to_base64` and `encode_string`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			valid_base64: is_valid_base64 (Result)
+
+	encode (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to standard Base64.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `to_base64`, `encode_string` and `base64_encode`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			valid_base64: is_valid_base64 (Result)
+
+	encode_bytes (a_bytes: ARRAY [NATURAL_8]): STRING_8
+			-- Encode `a_bytes` to standard Base64.
+		require
+			bytes_not_void: a_bytes /= Void
+		ensure
+			correct_length: Result.count = ((a_bytes.count + 2) // 3 * 4)
+
+	encode_bytes_mime (a_bytes: ARRAY [NATURAL_8]): STRING_8
+			-- Encode `a_bytes` to Base64 with MIME line wrapping.
+			-- Lines are wrapped at 76 characters per RFC 2045.
+		require
+			bytes_not_void: a_bytes /= Void
+
+	encode_jwt (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to URL-safe Base64URL (no padding).
+			-- Was declared in {SIMPLE_BASE64} as synonym of `encode_url`, `to_base64url` and `encode_token`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			no_padding: not Result.has ('=')
+			url_safe: not Result.has ('+') and not Result.has ('/')
+
+	encode_mime (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to Base64 with MIME line wrapping.
+			-- Lines are wrapped at 76 characters per RFC 2045.
+		require
+			input_not_void: a_input /= Void
+
+	encode_string (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to standard Base64.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `encode`, `to_base64` and `base64_encode`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			valid_base64: is_valid_base64 (Result)
+
+	encode_token (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to URL-safe Base64URL (no padding).
+			-- Was declared in {SIMPLE_BASE64} as synonym of `encode_url`, `to_base64url` and `encode_jwt`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			no_padding: not Result.has ('=')
+			url_safe: not Result.has ('+') and not Result.has ('/')
+
+	encode_url (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to URL-safe Base64URL (no padding).
+			-- Was declared in {SIMPLE_BASE64} as synonym of `to_base64url`, `encode_jwt` and `encode_token`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			no_padding: not Result.has ('=')
+			url_safe: not Result.has ('+') and not Result.has ('/')
+
+	encode_url_with_padding (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to URL-safe Base64URL (with padding).
+		require
+			input_not_void: a_input /= Void
+		ensure
+			url_safe: not Result.has ('+') and not Result.has ('/')
+
+	to_base64 (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to standard Base64.
+			-- Was declared in {SIMPLE_BASE64} as synonym of `encode`, `encode_string` and `base64_encode`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			valid_base64: is_valid_base64 (Result)
+
+	to_base64url (a_input: STRING_8): STRING_8
+			-- Encode `a_input` to URL-safe Base64URL (no padding).
+			-- Was declared in {SIMPLE_BASE64} as synonym of `encode_url`, `encode_jwt` and `encode_token`.
+		require
+			input_not_void: a_input /= Void
+		ensure
+			no_padding: not Result.has ('=')
+			url_safe: not Result.has ('+') and not Result.has ('/')
+	
+feature -- Output
+
+	Io: STD_FILES
+			-- Handle to standard file setup
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			io_not_void: Result /= Void
+
+	out: STRING_8
+			-- New string containing terse printable representation
+			-- of current object
+			-- (from ANY)
+		ensure -- from ANY
+			out_not_void: Result /= Void
+
+	print (o: detachable ANY)
+			-- Write terse external representation of `o`
+			-- on standard output.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+
+	frozen tagged_out: STRING_8
+			-- New string containing terse printable representation
+			-- of current object
+			-- (from ANY)
+		ensure -- from ANY
+			tagged_out_not_void: Result /= Void
+	
+feature -- Platform
+
+	Operating_environment: OPERATING_ENVIRONMENT
+			-- Objects available from the operating system
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			operating_environment_not_void: Result /= Void
+	
+feature -- Validation
+
+	is_base64 (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` valid standard Base64?
+			-- Was declared in {SIMPLE_BASE64} as synonym of `is_valid_base64` and `valid_base64`.
+		require
+			input_not_void: a_input /= Void
+
+	is_base64url (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` valid URL-safe Base64URL?
+			-- Was declared in {SIMPLE_BASE64} as synonym of `is_valid_base64_url` and `valid_base64url`.
+		require
+			input_not_void: a_input /= Void
+
+	is_valid_base64 (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` valid standard Base64?
+			-- Was declared in {SIMPLE_BASE64} as synonym of `is_base64` and `valid_base64`.
+		require
+			input_not_void: a_input /= Void
+
+	is_valid_base64_url (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` valid URL-safe Base64URL?
+			-- Was declared in {SIMPLE_BASE64} as synonym of `is_base64url` and `valid_base64url`.
+		require
+			input_not_void: a_input /= Void
+
+	valid_base64 (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` valid standard Base64?
+			-- Was declared in {SIMPLE_BASE64} as synonym of `is_valid_base64` and `is_base64`.
+		require
+			input_not_void: a_input /= Void
+
+	valid_base64url (a_input: STRING_8): BOOLEAN
+			-- Is `a_input` valid URL-safe Base64URL?
+			-- Was declared in {SIMPLE_BASE64} as synonym of `is_valid_base64_url` and `is_base64url`.
+		require
+			input_not_void: a_input /= Void
+	
+invariant
+	standard_alphabet_64: Standard_alphabet.count = 64
+	url_safe_alphabet_64: Url_safe_alphabet.count = 64
+
+		-- from ANY
+	reflexive_equality: standard_is_equal (Current)
+	reflexive_conformance: conforms_to (Current)
+
+note
+	copyright: "Copyright (c) 2024-2025, Larry Rix"
+	license: "MIT License"
+
+end -- class SIMPLE_BASE64
+
