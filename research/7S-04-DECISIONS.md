@@ -1,5 +1,8 @@
 # 7S-04: Design Decisions - simple_base64
 
+
+**Date**: 2026-01-23
+
 ## D1: Single Class Design
 
 **Decision:** All functionality in one class (SIMPLE_BASE64)

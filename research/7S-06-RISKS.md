@@ -1,5 +1,8 @@
 # 7S-06: Risks - simple_base64
 
+
+**Date**: 2026-01-23
+
 ## R1: Invalid Input Handling
 
 **Risk:** Decoding invalid Base64 could crash or produce garbage

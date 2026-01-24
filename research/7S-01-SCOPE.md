@@ -1,5 +1,8 @@
 # 7S-01: Scope - simple_base64
 
+
+**Date**: 2026-01-23
+
 ## Problem Statement
 
 Applications need to encode binary data as text for transmission via text-only channels (URLs, JSON, HTTP headers, email). Base64 is the standard solution, but Eiffel lacks a simple, contract-verified implementation.
