@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/logo.png" alt="simple_base64 logo" width="200">
+  <img src="docs/images/logo.svg" alt="simple_base64 logo" width="200">
 </p>
 
 <h1 align="center">simple_base64</h1>
